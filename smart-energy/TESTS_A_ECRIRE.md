@@ -65,6 +65,17 @@ Cette liste est la même que celle de la fiche de TP (section « Liste détaill�
 
 Indice X5 : `registry = load_registry()` puis `hash_sensor_id("S3", registry["salt"])`. Indice X6 : `REGISTRY_PATH.read_text()`.
 
+### Tests de robustesse ajoutés (X7 à X10)
+
+Ces tests supplémentaires sont implémentés dans `tests/test_security.py` :
+
+| N° | Entrée malveillante | Résultat attendu |
+|---|---|---|
+| X7 | Horodatage booléen, texte, négatif, NaN ou infini | `InvalidMeasurement` |
+| X8 | Mesure production, consommation ou batterie égale à NaN ou ±infini | `InvalidMeasurement` |
+| X9 | Horodatage négatif ou non fini transmis à `ReplayGuard` | `InvalidMeasurement` |
+| X10 | NaN dans le bilan, la durée ou la capacité de batterie | `ValueError` |
+
 **Question de réflexion :** un attaquant qui lit `sensors.json` peut-il retrouver `S1` ? Que se passe-t-il si les identifiants sont courts et faciles à deviner ? Que faudrait-il changer (identifiants longs et aléatoires, clé secrète) ?
 
 Pour chaque test de sécurité, écrivez en docstring : (1) la situation malveillante,

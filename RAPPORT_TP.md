@@ -182,10 +182,11 @@ Depuis le dossier `smart-energy` :
 python -m pytest -v
 ```
 
-Le projet contient actuellement 33 tests qui ont ete verifies localement :
+Le projet contient actuellement 53 cas de test verifies localement, dont les
+nouveaux cas X7-X10 de robustesse des entrees :
 
 ```text
-33 passed in 0.32s
+53 passed
 ```
 
 ## 8. Tableau de synthese de securite

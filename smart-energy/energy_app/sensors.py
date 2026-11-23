@@ -13,11 +13,21 @@ L'application hache l'identifiant reçu puis cherche l'empreinte dans le registr
 """
 import hashlib
 import json
+import math
 from pathlib import Path
 
 REGISTRY_PATH = Path(__file__).resolve().parent / "data" / "sensors.json"
 
 METRICS = ("production", "consumption", "battery")
+
+
+def _is_finite_number(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        return False
 
 
 class InvalidMeasurement(ValueError):
@@ -78,6 +88,9 @@ def parse_measurement(message, registry=None):
 
     if "timestamp" not in message:
         raise InvalidMeasurement("Horodatage manquant")
+    timestamp = message["timestamp"]
+    if not _is_finite_number(timestamp) or timestamp < 0:
+        raise InvalidMeasurement(f"Horodatage invalide : {timestamp!r}")
 
     found = [m for m in METRICS if m in message]
     if len(found) != 1:
@@ -90,8 +103,8 @@ def parse_measurement(message, registry=None):
         )
 
     value = message[metric]
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
-        raise InvalidMeasurement(f"Valeur non numérique : {value!r}")
+    if not _is_finite_number(value):
+        raise InvalidMeasurement(f"Valeur non numérique ou non finie : {value!r}")
     if metric == "battery":
         from energy_app.battery import validate_level
         validate_level(value)
@@ -102,7 +115,7 @@ def parse_measurement(message, registry=None):
         "sensor_id": sensor_id,
         "metric": metric,
         "value": value,
-        "timestamp": message["timestamp"],
+        "timestamp": timestamp,
     }
 
 
@@ -114,7 +127,7 @@ class ReplayGuard:
 
     def check(self, sensor_id, timestamp):
         """Accepte le message ou lève ReplayError s'il est rejoué."""
-        if not isinstance(timestamp, (int, float)) or isinstance(timestamp, bool):
+        if not _is_finite_number(timestamp) or timestamp < 0:
             raise InvalidMeasurement("Horodatage invalide")
         previous = self._last_timestamp.get(sensor_id)
         if previous is not None and timestamp <= previous:

@@ -1,12 +1,23 @@
 """Suivi du niveau de batterie (module partiellement implémenté)."""
 
+import math
+
 LOW_THRESHOLD = 20       # en %, en dessous : batterie faible
 CAPACITY_WH = 5000       # capacité de la batterie en Wh
 
 
+def _is_finite_number(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        return False
+
+
 def validate_level(level):
     """Le niveau de batterie doit être compris entre 0 et 100 %."""
-    if isinstance(level, bool) or not isinstance(level, (int, float)):
+    if not _is_finite_number(level):
         raise ValueError(f"Niveau invalide : {level!r}")
     if level < 0 or level > 100:
         raise ValueError(f"Niveau hors limites (0-100) : {level}")
@@ -25,13 +36,13 @@ def update_level(level, balance_w, duration_h=1.0, capacity_wh=CAPACITY_WH):
     Un surplus (bilan > 0) charge la batterie, un déficit la décharge.
     """
     validate_level(level)
-    if isinstance(balance_w, bool) or not isinstance(balance_w, (int, float)):
+    if not _is_finite_number(balance_w):
         raise ValueError(f"Bilan invalide : {balance_w!r}")
-    if isinstance(duration_h, bool) or not isinstance(duration_h, (int, float)):
+    if not _is_finite_number(duration_h):
         raise ValueError(f"Durée invalide : {duration_h!r}")
     if duration_h < 0:
         raise ValueError("La durée ne peut pas être négative")
-    if isinstance(capacity_wh, bool) or not isinstance(capacity_wh, (int, float)):
+    if not _is_finite_number(capacity_wh):
         raise ValueError(f"Capacité invalide : {capacity_wh!r}")
     if capacity_wh <= 0:
         raise ValueError("La capacité doit être strictement positive")

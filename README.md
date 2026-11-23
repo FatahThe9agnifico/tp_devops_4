@@ -45,7 +45,7 @@ pip install -r requirements.txt
 python -m pytest -v
 ```
 
-Resultat local attendu : **33 tests collectes et 33 tests reussis**.
+Resultat local attendu : **53 tests collectes et 53 tests reussis**.
 
 ## Structure
 

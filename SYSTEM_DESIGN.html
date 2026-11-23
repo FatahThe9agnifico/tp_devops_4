@@ -465,6 +465,32 @@
           </tbody>
         </table>
       </div>
+      <div class="grid two" style="margin-top:18px">
+        <article class="card">
+          <span class="tag red">Runnable regression tests</span>
+          <h3>New input-validation cases</h3>
+          <p>The Python suite adds parameterized tests for security edge cases that the prototype can enforce today:</p>
+          <ul>
+            <li><strong>X7:</strong> reject boolean, string, negative, NaN, or infinite timestamps.</li>
+            <li><strong>X8:</strong> reject NaN and positive or negative infinity for production, consumption, and battery measurements.</li>
+            <li><strong>X9:</strong> reject negative and non-finite timestamps in the replay guard.</li>
+            <li><strong>X10:</strong> reject NaN in battery balance, duration, and capacity calculations.</li>
+          </ul>
+          <p>Run them from <code>smart-energy</code> with <code>python -m pytest -v tests/test_security.py</code>.</p>
+        </article>
+        <article class="card">
+          <span class="tag blue">Future tests before a pilot</span>
+          <h3>Tests that need production components</h3>
+          <ul>
+            <li>Unknown, revoked, or expired device credentials and invalid message signatures are denied.</li>
+            <li>Duplicate event IDs do not create duplicate readings or InerCoin credits, including after a service restart.</li>
+            <li>A device cannot read another home's data or issue a command for another home.</li>
+            <li>Expired, modified, unauthorized, or replayed battery commands are rejected by the home controller.</li>
+            <li>Database quorum loss, delayed telemetry, and recovery do not create false successful settlements.</li>
+          </ul>
+          <p class="small">These are design requirements, not implemented tests: the current prototype has no credentials, command service, durable event store, or token ledger.</p>
+        </article>
+      </div>
     </section>
 
     <section id="roadmap">

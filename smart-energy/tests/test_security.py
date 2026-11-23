@@ -1,7 +1,8 @@
 import pytest
 
-from energy_app.battery import validate_level
+from energy_app.battery import update_level, validate_level
 from energy_app.sensors import (
+    InvalidMeasurement,
     ReplayGuard,
     ReplayError,
     SensorMismatchError,
@@ -69,3 +70,56 @@ def test_x6_registry_does_not_contain_plain_sensor_ids():
     assert "S1" not in encoded
     assert "S2" not in encoded
     assert "S3" not in encoded
+
+
+@pytest.mark.parametrize("timestamp", [True, "100", -1, float("nan"), float("inf")])
+def test_x7_malformed_timestamp_is_rejected(timestamp):
+    """Situation : a message uses an invalid timestamp.
+    Expected behavior : the message is rejected before use.
+    Passing result : InvalidMeasurement is raised for every malformed timestamp."""
+    with pytest.raises(InvalidMeasurement):
+        parse_measurement(
+            {"sensor_id": "S3", "timestamp": timestamp, "battery": 15}
+        )
+
+
+@pytest.mark.parametrize(
+    ("sensor_id", "metric"),
+    [("S1", "production"), ("S2", "consumption"), ("S3", "battery")],
+)
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_x8_non_finite_measurement_is_rejected(sensor_id, metric, value):
+    """Situation : a compromised source sends NaN or infinity as a reading.
+    Expected behavior : non-finite readings are rejected.
+    Passing result : InvalidMeasurement is raised for each sensor metric."""
+    with pytest.raises(InvalidMeasurement):
+        parse_measurement(
+            {"sensor_id": sensor_id, "timestamp": 100, metric: value}
+        )
+
+
+@pytest.mark.parametrize("timestamp", [-1, float("nan"), float("inf")])
+def test_x9_replay_guard_rejects_invalid_timestamp(timestamp):
+    """Situation : a replay check receives a negative or non-finite timestamp.
+    Expected behavior : invalid time values cannot advance the replay state.
+    Passing result : InvalidMeasurement is raised."""
+    with pytest.raises(InvalidMeasurement):
+        ReplayGuard().check("S3", timestamp)
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        {"balance_w": float("nan")},
+        {"duration_h": float("nan")},
+        {"capacity_wh": float("nan")},
+    ],
+)
+def test_x10_battery_calculation_rejects_non_finite_inputs(arguments):
+    """Situation : energy calculation receives NaN as a control input.
+    Expected behavior : invalid arithmetic inputs are rejected.
+    Passing result : ValueError is raised instead of propagating a NaN state."""
+    with pytest.raises(ValueError):
+        inputs = {"balance_w": 500, "duration_h": 1, "capacity_wh": 5000}
+        inputs.update(arguments)
+        update_level(50, **inputs)
