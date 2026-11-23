@@ -9,6 +9,7 @@ et executer ces tests avec GitHub Actions.
 - Depot GitHub : https://github.com/FatahThe9agnifico/tp_devops_4
 - Projet principal : [`smart-energy/`](./smart-energy)
 - Rapport detaille : [`RAPPORT_TP.md`](./RAPPORT_TP.md)
+- Architecture reseau et InerCoin : [`SYSTEM_DESIGN.html`](./SYSTEM_DESIGN.html)
 - Sujet officiel : [`tp_tests_continus_energie.pdf`](./tp_tests_continus_energie.pdf)
 
 ## Fonctionnement
@@ -77,7 +78,7 @@ Les controles principaux sont :
 
 ## Integrations continues
 
-Le workflow [`.github/workflows/tests.yml`](./smart-energy/.github/workflows/tests.yml)
+Le workflow [`.github/workflows/tests.yml`](./.github/workflows/tests.yml)
 s'execute pour les pushs et les pull requests vers `main`. Il utilise Python
 3.12, installe `requirements.txt` puis lance `pytest -v`.
 

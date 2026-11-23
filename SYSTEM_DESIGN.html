@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Business and technical design for a network of solar homes, shared energy services, and hypothetical InerCoin settlement.">
+  <title>Solar Commons | Distributed Home Energy Network</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172b3a;
+      --muted: #587080;
+      --paper: #f5f8f6;
+      --surface: #fff;
+      --line: #dce7e2;
+      --green: #147d63;
+      --green-dark: #0c5848;
+      --mint: #e4f4ed;
+      --sun: #f2a900;
+      --blue: #2864a0;
+      --blue-soft: #eaf2fa;
+      --red: #a63e35;
+      --red-soft: #fff0ed;
+      --shadow: 0 16px 42px rgba(23, 43, 58, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--paper); line-height: 1.65; }
+    a { color: var(--green-dark); }
+    a:focus-visible, button:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+    .wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar { padding: 18px 0; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.88); }
+    .topbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.03em; }
+    .brand-mark { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 12px; color: #fff; background: var(--green); }
+    nav { display: flex; flex-wrap: wrap; gap: 18px; font-size: .9rem; }
+    nav a { text-decoration: none; color: var(--muted); }
+    nav a:hover { color: var(--green-dark); }
+    .hero { padding: 78px 0 56px; background: radial-gradient(ellipse at 86% 12%, #ddf2e7 0, transparent 33%), linear-gradient(150deg, #f8fbf8, #eef5f1); }
+    .eyebrow { margin: 0 0 12px; color: var(--green); font-size: .8rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { max-width: 850px; margin: 0; font-size: clamp(2.4rem, 6vw, 4.7rem); letter-spacing: -.06em; line-height: 1.04; }
+    .hero-copy { max-width: 780px; margin: 22px 0 0; color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.25rem); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .button { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; padding: 10px 17px; border: 1px solid var(--green); border-radius: 10px; color: #fff; background: var(--green); font-weight: 700; text-decoration: none; }
+    .button.secondary { color: var(--green-dark); background: transparent; }
+    main { padding: 38px 0 74px; }
+    section { scroll-margin-top: 24px; margin-top: 30px; }
+    .section-heading { max-width: 800px; margin-bottom: 22px; }
+    h2 { margin: 0 0 9px; font-size: clamp(1.65rem, 3vw, 2.4rem); letter-spacing: -.04em; line-height: 1.16; }
+    h3 { margin: 0 0 9px; font-size: 1.1rem; letter-spacing: -.02em; }
+    p { margin: 0 0 13px; }
+    .lead { color: var(--muted); font-size: 1.07rem; }
+    .grid { display: grid; gap: 16px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card { padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+    .card p:last-child, .card ul:last-child { margin-bottom: 0; }
+    .tag { display: inline-block; margin-bottom: 12px; padding: 4px 9px; border-radius: 999px; color: var(--green-dark); background: var(--mint); font-size: .76rem; font-weight: 800; }
+    .tag.blue { color: #214e7d; background: var(--blue-soft); }
+    .tag.gold { color: #785600; background: #fff4d2; }
+    .tag.red { color: #8d3029; background: #ffe3de; }
+    .diagram { overflow: hidden; padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: var(--shadow); }
+    .diagram svg { display: block; width: 100%; height: auto; }
+    .diagram-caption { margin: 13px 4px 0; color: var(--muted); font-size: .9rem; }
+    .flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; counter-reset: flow; }
+    .flow-step { position: relative; min-height: 164px; padding: 18px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff; counter-increment: flow; }
+    .flow-step::before { content: counter(flow, decimal-leading-zero); display: inline-grid; width: 32px; height: 32px; margin-bottom: 10px; place-items: center; border-radius: 50%; color: #fff; background: var(--green); font-size: .75rem; font-weight: 800; }
+    .flow-step p { color: var(--muted); font-size: .9rem; }
+    .callout { padding: 18px 20px; border-left: 4px solid var(--sun); border-radius: 0 12px 12px 0; background: #fff8e4; }
+    .callout strong { color: #674b00; }
+    .callout.danger { border-color: var(--red); background: var(--red-soft); }
+    .callout.danger strong { color: #812b25; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 13px 15px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--ink); background: #edf4f0; font-size: .85rem; }
+    td { color: var(--muted); }
+    tr:last-child td { border-bottom: 0; }
+    code { padding: .12em .35em; border-radius: 5px; background: #edf2ef; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .9em; }
+    pre { overflow-x: auto; padding: 18px; border-radius: 12px; color: #e9f4f0; background: #18352f; line-height: 1.55; }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    ul, ol { padding-left: 21px; }
+    li { margin: 5px 0; }
+    .security-list { display: grid; gap: 12px; }
+    .security-item { padding: 18px; border: 1px solid #f0d7d2; border-radius: 14px; background: #fff; }
+    .security-item h3 { display: flex; align-items: center; gap: 9px; }
+    .severity { padding: 3px 8px; border-radius: 999px; color: #812b25; background: #ffe3de; font-size: .7rem; letter-spacing: .04em; text-transform: uppercase; }
+    .risk-matrix td:first-child { color: var(--ink); font-weight: 700; }
+    .footer { padding: 26px 0; border-top: 1px solid var(--line); color: var(--muted); background: #fff; font-size: .9rem; }
+    .footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+    .small { color: var(--muted); font-size: .9rem; }
+    @media (max-width: 820px) {
+      .grid.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flow-step:last-child { grid-column: 1 / -1; min-height: auto; }
+    }
+    @media (max-width: 600px) {
+      .wrap { width: min(100% - 28px, 1120px); }
+      .topbar-inner { align-items: flex-start; flex-direction: column; }
+      nav { gap: 10px 14px; }
+      .hero { padding: 54px 0 40px; }
+      .grid.two, .grid.three, .flow { grid-template-columns: 1fr; }
+      .flow-step:last-child { grid-column: auto; }
+      .card { padding: 18px; }
+      .diagram { padding: 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+    @media print {
+      body { background: #fff; }
+      .topbar, .hero-actions { display: none; }
+      .hero { padding: 24px 0; background: #fff; }
+      .card, .diagram { box-shadow: none; break-inside: avoid; }
+      section { break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#top" aria-label="Solar Commons, home">
+        <span class="brand-mark" aria-hidden="true">SC</span>
+        <span>Solar Commons <span class="small">/ system concept</span></span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#business">Business</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#inercoin">InerCoin</a>
+        <a href="#security">Security review</a>
+        <a href="#roadmap">Roadmap</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="top" class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Distributed solar homes · Concept design</p>
+      <h1>A neighborhood energy network, designed around each home.</h1>
+      <p class="hero-copy">
+        Connect homes with solar panels, smart meters, and batteries to measure
+        local energy, share verified surplus, and settle community transactions
+        with a proposed energy credit called <strong>InerCoin</strong>.
+      </p>
+      <div class="hero-actions">
+        <a class="button" href="#architecture">Explore the system</a>
+        <a class="button secondary" href="#security">Review the risks</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <section id="business">
+      <div class="section-heading">
+        <p class="eyebrow">01 · Business context</p>
+        <h2>Why build this network?</h2>
+        <p class="lead">
+          A local energy community can make better use of rooftop generation:
+          households with temporary surplus can support participating homes
+          with demand, while storage helps shift energy over time.
+        </p>
+      </div>
+      <div class="grid three">
+        <article class="card">
+          <span class="tag">For households</span>
+          <h3>More value from local solar</h3>
+          <p>Track production, consumption, and battery state; see when a home exports energy or draws from the community.</p>
+        </article>
+        <article class="card">
+          <span class="tag blue">For the operator</span>
+          <h3>One view of many homes</h3>
+          <p>Monitor network health, meter data, settlement records, and exceptions through one service and operational dashboard.</p>
+        </article>
+        <article class="card">
+          <span class="tag gold">For the community</span>
+          <h3>Transparent accounting</h3>
+          <p>Use auditable readings and published rules to calculate who supplied or consumed energy and how credits were assigned.</p>
+        </article>
+      </div>
+      <div class="callout" style="margin-top:16px">
+        <strong>Important physical distinction:</strong>
+        InerCoin does not move electricity. Power flows through the electrical
+        network under the grid operator's rules. The token is only a proposed
+        accounting or settlement instrument for measured, eligible energy.
+      </div>
+    </section>
+
+    <section id="architecture">
+      <div class="section-heading">
+        <p class="eyebrow">02 · System architecture</p>
+        <h2>Many independent homes, one service endpoint</h2>
+        <p class="lead">
+          Each home is a node with its own panels, meter, battery controller,
+          and edge gateway. Nodes communicate securely with a central service.
+          That service uses a replicated database cluster so a single database
+          machine failure does not necessarily stop the system.
+        </p>
+      </div>
+      <div class="diagram">
+        <svg viewBox="0 0 1080 500" role="img" aria-labelledby="diagram-title diagram-desc">
+          <title id="diagram-title">Solar homes connected to one central energy service</title>
+          <desc id="diagram-desc">Three home nodes send authenticated meter events over encrypted connections to a central service, which processes readings and writes records to three database replicas using Raft consensus. InerCoin is an optional settlement layer.</desc>
+          <defs>
+            <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#147d63"></path>
+            </marker>
+            <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#2864a0"></path>
+            </marker>
+          </defs>
+          <rect x="14" y="12" width="1052" height="476" rx="18" fill="#f8fbf9" stroke="#dce7e2"/>
+          <text x="40" y="48" font-size="16" font-weight="700" fill="#587080">HOME NODES</text>
+          <g font-family="system-ui, sans-serif">
+            <g transform="translate(40 78)">
+              <rect width="275" height="114" rx="14" fill="#fff" stroke="#b8d5c9" stroke-width="2"/>
+              <text x="18" y="28" font-size="16" font-weight="700" fill="#172b3a">Home 01</text>
+              <text x="18" y="53" font-size="13" fill="#587080">Solar + meter + battery</text>
+              <rect x="18" y="70" width="239" height="26" rx="7" fill="#e4f4ed"/>
+              <text x="30" y="88" font-size="12" font-weight="700" fill="#0c5848">Edge gateway · buffer · safety</text>
+            </g>
+            <g transform="translate(40 215)">
+              <rect width="275" height="114" rx="14" fill="#fff" stroke="#b8d5c9" stroke-width="2"/>
+              <text x="18" y="28" font-size="16" font-weight="700" fill="#172b3a">Home 02</text>
+              <text x="18" y="53" font-size="13" fill="#587080">Solar + meter + battery</text>
+              <rect x="18" y="70" width="239" height="26" rx="7" fill="#e4f4ed"/>
+              <text x="30" y="88" font-size="12" font-weight="700" fill="#0c5848">Edge gateway · buffer · safety</text>
+            </g>
+            <g transform="translate(40 352)">
+              <rect width="275" height="114" rx="14" fill="#fff" stroke="#b8d5c9" stroke-width="2"/>
+              <text x="18" y="28" font-size="16" font-weight="700" fill="#172b3a">Home N</text>
+              <text x="18" y="53" font-size="13" fill="#587080">Solar + meter + battery</text>
+              <rect x="18" y="70" width="239" height="26" rx="7" fill="#e4f4ed"/>
+              <text x="30" y="88" font-size="12" font-weight="700" fill="#0c5848">Edge gateway · buffer · safety</text>
+            </g>
+            <path d="M315 135 C365 135 360 245 405 245" fill="none" stroke="#147d63" stroke-width="3" marker-end="url(#arrow-green)"/>
+            <path d="M315 272 H405" fill="none" stroke="#147d63" stroke-width="3" marker-end="url(#arrow-green)"/>
+            <path d="M315 409 C365 409 360 300 405 300" fill="none" stroke="#147d63" stroke-width="3" marker-end="url(#arrow-green)"/>
+            <text x="326" y="185" font-size="12" fill="#0c5848">MQTT / HTTPS · TLS · device identity</text>
+            <rect x="405" y="155" width="265" height="230" rx="18" fill="#eaf2fa" stroke="#2864a0" stroke-width="2"/>
+            <text x="428" y="188" font-size="17" font-weight="800" fill="#214e7d">Central service</text>
+            <text x="428" y="222" font-size="13" fill="#172b3a">1. Authenticate device</text>
+            <text x="428" y="251" font-size="13" fill="#172b3a">2. Validate &amp; deduplicate event</text>
+            <text x="428" y="280" font-size="13" fill="#172b3a">3. Calculate energy state</text>
+            <text x="428" y="309" font-size="13" fill="#172b3a">4. Alert / settle / audit</text>
+            <rect x="428" y="333" width="217" height="31" rx="8" fill="#fff"/>
+            <text x="440" y="353" font-size="11" font-weight="700" fill="#587080">API + event processing</text>
+            <path d="M670 270 H728" fill="none" stroke="#2864a0" stroke-width="3" marker-end="url(#arrow-blue)"/>
+            <text x="675" y="249" font-size="11" fill="#214e7d">committed writes</text>
+            <rect x="735" y="78" width="290" height="280" rx="18" fill="#fff" stroke="#8ab7a5" stroke-width="2"/>
+            <text x="758" y="111" font-size="17" font-weight="800" fill="#0c5848">Distributed database</text>
+            <text x="758" y="135" font-size="12" fill="#587080">Three stable replicas · Raft quorum</text>
+            <rect x="758" y="157" width="242" height="45" rx="9" fill="#e4f4ed"/>
+            <text x="776" y="185" font-size="13" font-weight="700" fill="#0c5848">Replica A · leader (example)</text>
+            <rect x="758" y="216" width="242" height="45" rx="9" fill="#f2f7f4"/>
+            <text x="776" y="244" font-size="13" font-weight="700" fill="#172b3a">Replica B · follower</text>
+            <rect x="758" y="275" width="242" height="45" rx="9" fill="#f2f7f4"/>
+            <text x="776" y="303" font-size="13" font-weight="700" fill="#172b3a">Replica C · follower</text>
+            <rect x="735" y="382" width="290" height="84" rx="14" fill="#fff8e4" stroke="#edcf72"/>
+            <text x="758" y="410" font-size="15" font-weight="800" fill="#674b00">Optional InerCoin settlement</text>
+            <text x="758" y="433" font-size="12" fill="#674b00">Credit ledger · not a power-routing system</text>
+            <path d="M865 358 V378" fill="none" stroke="#f2a900" stroke-width="2" stroke-dasharray="5 5"/>
+          </g>
+        </svg>
+        <p class="diagram-caption">
+          The homes are data-producing nodes, not database consensus members.
+          Raft runs among stable server-side replicas; it is not an energy
+          trading algorithm.
+        </p>
+      </div>
+    </section>
+
+    <section id="flow">
+      <div class="section-heading">
+        <p class="eyebrow">03 · E-C-A and message flow</p>
+        <h2>Authenticate first, then process the event</h2>
+        <p class="lead">
+          E-C-A here means <strong>Event – Control – Authentication</strong>,
+          using the terminology supplied for this project. For a secure
+          implementation, authentication must happen at the transport or
+          message boundary before an event is accepted or control logic runs.
+        </p>
+      </div>
+      <div class="flow">
+        <article class="flow-step">
+          <h3>Authenticate</h3>
+          <p>Verify device identity, message signature, authorization, and session status.</p>
+        </article>
+        <article class="flow-step">
+          <h3>Receive event</h3>
+          <p>Accept a typed reading with home ID, device ID, time, sequence, value, and unit.</p>
+        </article>
+        <article class="flow-step">
+          <h3>Validate &amp; deduplicate</h3>
+          <p>Check range, ownership, freshness, sequence, and idempotency before storage.</p>
+        </article>
+        <article class="flow-step">
+          <h3>Control &amp; calculate</h3>
+          <p>Update derived energy state and issue only policy-authorized recommendations.</p>
+        </article>
+        <article class="flow-step">
+          <h3>Record &amp; settle</h3>
+          <p>Commit audit data; create InerCoin entries only from eligible, reconciled energy.</p>
+        </article>
+      </div>
+      <div class="grid two" style="margin-top:16px">
+        <article class="card">
+          <h3>Example telemetry event</h3>
+          <pre><code>{
+  "home_id": "home-104",
+  "device_id": "meter-104-battery",
+  "event_id": "boot-7:8274",
+  "timestamp": "2026-11-23T13:49:00Z",
+  "sequence": 8274,
+  "metric": "battery_soc",
+  "value": 62.5,
+  "unit": "percent"
+}</code></pre>
+        </article>
+        <article class="card">
+          <h3>Separate telemetry and commands</h3>
+          <p>Meter readings are observations. Battery or inverter commands are high-impact actions and need a separate authorization path, strict limits, expiration, acknowledgement, and local safety enforcement.</p>
+          <p class="small">The central service should not be able to override hardware protections or manufacturer limits.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="inercoin">
+      <div class="section-heading">
+        <p class="eyebrow">04 · Proposed energy credit</p>
+        <h2>InerCoin: a settlement concept, not a physical currency of electrons</h2>
+        <p class="lead">
+          InerCoin is hypothetical in this design. It could represent a
+          community credit for verified net energy delivered, subject to local
+          electricity-market, consumer-protection, tax, and financial rules.
+          It should not be presented as a real or legally approved currency.
+        </p>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <span class="tag gold">Illustrative settlement</span>
+          <h3>Metered export becomes a proposed credit</h3>
+          <ol>
+            <li>Collect interval readings from approved meters.</li>
+            <li>Reconcile imports, exports, losses, and corrections.</li>
+            <li>Apply a published tariff and eligibility policy.</li>
+            <li>Post a signed, auditable debit/credit entry.</li>
+            <li>Allow disputes and reversals without deleting history.</li>
+          </ol>
+        </article>
+        <article class="card">
+          <span class="tag blue">Keep the ledger honest</span>
+          <h3>Separate the energy record from token custody</h3>
+          <p>Keep raw meter readings and settlement calculations in the operational data platform. If a token ledger is later justified, use it as a separate settlement component with explicit governance.</p>
+          <p>A token balance is not proof that energy physically flowed, and a blockchain cannot make a compromised meter reading true.</p>
+        </article>
+      </div>
+      <div class="table-wrap" style="margin-top:16px">
+        <table>
+          <thead><tr><th>Design question</th><th>Recommendation for a pilot</th></tr></thead>
+          <tbody>
+            <tr><td>What is one InerCoin worth?</td><td>Define a clear unit and conversion policy (for example, a credit per eligible kWh); publish whether it is redeemable, transferable, or only an internal accounting unit.</td></tr>
+            <tr><td>Who validates a transaction?</td><td>Use the approved meter, reconciliation rules, and authorized operator workflow. Do not treat a token consensus vote as a substitute for metrology.</td></tr>
+            <tr><td>Who can reverse an error?</td><td>Use append-only correction entries with actor, reason, and evidence; never erase the original record.</td></tr>
+            <tr><td>Is a public blockchain required?</td><td>Not for a single operator. Start with a conventional auditable ledger; consider distributed-ledger technology only if independent parties need shared governance.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="consensus">
+      <div class="section-heading">
+        <p class="eyebrow">05 · Consistency and availability</p>
+        <h2>Raft for the database, not for household energy control</h2>
+      </div>
+      <div class="grid three">
+        <article class="card">
+          <h3>Three replicas</h3>
+          <p>A three-member Raft group can commit when a majority (two) is available and can tolerate one unavailable member, assuming correct deployment and independent failure domains.</p>
+        </article>
+        <article class="card">
+          <h3>One service address</h3>
+          <p>Homes connect to one logical API/MQTT endpoint, backed by redundant service instances. This gives a simple client configuration without making one computer the only server.</p>
+        </article>
+        <article class="card">
+          <h3>Offline-tolerant homes</h3>
+          <p>Gateways buffer signed, sequenced events during outages. Local inverter protections continue independently; delayed telemetry is reconciled when connectivity returns.</p>
+        </article>
+      </div>
+      <div class="callout danger" style="margin-top:16px">
+        <strong>Availability caveat:</strong>
+        Three database copies on one machine, one rack, one power feed, or one
+        site do not provide meaningful infrastructure resilience. Replication
+        is also not a backup; use tested, isolated backups and recovery drills.
+      </div>
+    </section>
+
+    <section id="security">
+      <div class="section-heading">
+        <p class="eyebrow">06 · Security and design limitations</p>
+        <h2>Threats to address before connecting real homes</h2>
+        <p class="lead">
+          The current Python project is a teaching prototype, not a production
+          security boundary. Its tests demonstrate useful checks, but they do
+          not provide device authentication, trusted measurements, or safe
+          control of real batteries.
+        </p>
+      </div>
+      <div class="security-list">
+        <article class="security-item">
+          <h3><span class="severity">High</span> Hashing IDs is not authentication</h3>
+          <p>The prototype uses a public salt and short IDs such as S1. Anyone who can read the registry can test guesses. A hash lookup does not prove that the sender controls the sensor.</p>
+          <p><strong>Improve:</strong> provision each device with a unique, random credential held in secure hardware where possible; use mutual TLS or signed messages, key rotation, revocation, and a secure enrollment process. Never use a shared fleet secret.</p>
+        </article>
+        <article class="security-item">
+          <h3><span class="severity">High</span> Meter integrity and physical tampering</h3>
+          <p>A valid device can still report a faulty, misconfigured, or physically manipulated measurement. Cryptographic signatures prove message origin and integrity, not that the physical reading is correct.</p>
+          <p><strong>Improve:</strong> use certified meters, tamper evidence, calibration and anomaly checks, independent reconciliation, and clear dispute procedures. Treat meter trust as a separate problem from network security.</p>
+        </article>
+        <article class="security-item">
+          <h3><span class="severity">High</span> Unsafe remote control</h3>
+          <p>A compromised service or stolen operator credential could send battery commands. The demo calculates battery state but does not implement a production command authorization or hardware safety layer.</p>
+          <p><strong>Improve:</strong> keep hard safety limits at the home controller; use least privilege, signed and expiring commands, operator approval for sensitive actions, rate limits, acknowledgements, and a safe offline mode.</p>
+        </article>
+        <article class="security-item">
+          <h3><span class="severity">High</span> Replays, clocks, and restart behavior</h3>
+          <p>The in-memory replay guard is lost on restart and relies on a timestamp supplied by the sender. A timestamp alone can be misleading if clocks drift or are changed.</p>
+          <p><strong>Improve:</strong> persist sequence state, bind a monotonic counter to device identity and boot/session ID, enforce idempotency at storage, use trusted time where available, and define recovery for counter resets.</p>
+        </article>
+        <article class="security-item">
+          <h3><span class="severity">High</span> Central service is a high-value target</h3>
+          <p>A central service simplifies operations but creates a concentration of control, personal energy data, and settlement authority. A service outage or compromise can affect every connected home.</p>
+          <p><strong>Improve:</strong> isolate public ingress, use network segmentation, hardened deployment, short-lived credentials, MFA for operators, auditable privileged access, tested incident response, and separate production from development.</p>
+        </article>
+        <article class="security-item">
+          <h3><span class="severity">Medium</span> Replication, consensus, and backups</h3>
+          <p>Raft provides consistency among database members; it does not prevent an authorized but malicious application from writing false data, and it does not protect against a quorum loss or correlated site failure.</p>
+          <p><strong>Improve:</strong> use independent failure zones, encrypted and access-controlled backups, point-in-time recovery, restore testing, monitoring, and an explicit degraded-mode policy.</p>
+        </article>
+        <article class="security-item">
+          <h3><span class="severity">Medium</span> Privacy and household inference</h3>
+          <p>High-frequency consumption data may reveal occupancy and routines. Long retention and broad access increase privacy and breach impact.</p>
+          <p><strong>Improve:</strong> minimize collection, aggregate where possible, define retention and deletion policies, encrypt data in transit and at rest, and enforce tenant-level access and audit trails.</p>
+        </article>
+        <article class="security-item">
+          <h3><span class="severity">Medium</span> InerCoin, fraud, and regulation</h3>
+          <p>A token creates additional risks: double settlement, meter collusion, stolen keys, irreversible transfers, contract bugs, price volatility, and legal classification as a payment or financial product.</p>
+          <p><strong>Improve:</strong> pilot non-transferable credits first, reconcile against trusted meter intervals, define dispute and reversal processes, commission legal review, and do not deploy smart contracts before threat modeling and independent audits.</p>
+        </article>
+      </div>
+      <div class="table-wrap" style="margin-top:18px">
+        <table class="risk-matrix">
+          <thead><tr><th>Current prototype behavior</th><th>Limitation</th><th>Production direction</th></tr></thead>
+          <tbody>
+            <tr><td>SHA-256(salt + short ID)</td><td>Public salt and guessable IDs; no proof of possession</td><td>Unique device credentials, mTLS or message signatures, secure provisioning and revocation</td></tr>
+            <tr><td>Timestamp presence check</td><td>No format, clock trust, future-time, or persisted replay policy</td><td>Authenticated monotonic sequence + session ID + persistent idempotency</td></tr>
+            <tr><td>Python exception checks</td><td>Input types and bounds are not a complete schema; malformed messages may cross assumptions</td><td>Versioned schemas, strict validation, size limits, fuzzing, and explicit error handling</td></tr>
+            <tr><td>In-memory replay state</td><td>State disappears on restart and is not shared across instances</td><td>Durable, atomic per-device sequence tracking</td></tr>
+            <tr><td>One central endpoint</td><td>Potential service, network, and operator single points of failure</td><td>Redundant service instances, failover, local buffering, least-privilege operations</td></tr>
+            <tr><td>Three replicated DB nodes</td><td>No guarantee if colocated; consensus is not a backup or truth oracle</td><td>Independent failure domains, offline backups, restore drills, and provenance controls</td></tr>
+            <tr><td>InerCoin settlement idea</td><td>Not defined, validated, or legally assessed</td><td>Meter reconciliation, transparent tariffs, governance, consumer protection, and legal review</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="section-heading">
+        <p class="eyebrow">07 · Delivery plan</p>
+        <h2>Build trust before adding token complexity</h2>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <h3>Phase 1 · Safe telemetry pilot</h3>
+          <ul>
+            <li>Choose certified meters and a small set of test homes.</li>
+            <li>Implement device enrollment, mutual authentication, and TLS.</li>
+            <li>Add durable event IDs, schema validation, buffering, and audit records.</li>
+            <li>Run threat modeling and tabletop outage/incident exercises.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Phase 2 · Reconciliation and settlement</h3>
+          <ul>
+            <li>Define import/export intervals, losses, tariff, and dispute rules.</li>
+            <li>Test reconciliation and corrections with simulated and real meter data.</li>
+            <li>Assess legal, privacy, tax, and consumer obligations.</li>
+            <li>Trial InerCoin as an internal credit only if it solves a real business need.</li>
+          </ul>
+        </article>
+      </div>
+      <div class="callout" style="margin-top:16px">
+        <strong>Success measures:</strong>
+        meter-data completeness and accuracy, time to detect a failed node,
+        recovery time after an outage, settlement mismatch rate, unresolved
+        disputes, and verified security-control coverage.
+      </div>
+    </section>
+
+    <section id="project">
+      <div class="section-heading">
+        <p class="eyebrow">Related project</p>
+        <h2>From the class prototype to this concept</h2>
+      </div>
+      <div class="grid three">
+        <article class="card">
+          <h3>Sensor validation</h3>
+          <p><a href="smart-energy/energy_app/sensors.py">sensors.py</a> illustrates message parsing, sensor registration, metric checks, and replay handling.</p>
+        </article>
+        <article class="card">
+          <h3>Energy and battery</h3>
+          <p><a href="smart-energy/energy_app/energy.py">energy.py</a> and <a href="smart-energy/energy_app/battery.py">battery.py</a> model balance and a simplified battery state.</p>
+        </article>
+        <article class="card">
+          <h3>Automated checks</h3>
+          <p><a href="smart-energy/tests/">The tests</a> cover unit, integration, and security cases. This concept adds the networking, durable storage, and operational concerns needed for a larger system.</p>
+        </article>
+      </div>
+      <p class="small" style="margin-top:14px">
+        This document is a design proposal for learning and discussion, not
+        engineering certification, financial advice, or authorization to
+        operate electrical equipment.
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span>Solar Commons · distributed home-energy system concept</span>
+      <a href="README.md">Project README</a>
+    </div>
+  </footer>
+</body>
+</html>
