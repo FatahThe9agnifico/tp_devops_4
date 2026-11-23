@@ -1,6 +1,5 @@
 name: Tests
 
-# TODO 1 : déclencher le workflow sur push ET pull_request vers la branche main
 on:
   push:
     branches: [main]
@@ -21,6 +20,8 @@ jobs:
 
       - name: Installer les dépendances
         run: pip install -r requirements.txt
+        working-directory: smart-energy
 
       - name: Lancer les tests
         run: pytest -v
+        working-directory: smart-energy
