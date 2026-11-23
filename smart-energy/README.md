@@ -1,9 +1,10 @@
 # smart-energy : TP « Les tests continus dans DevOps »
 
-Squelette du projet de gestion intelligente de l'énergie solaire.
-Votre travail : **écrire les tests** (les fichiers de `tests/` sont vides),
-**compléter le code marqué `TODO`** et **terminer le workflow** GitHub Actions.
-Le guide `TESTS_A_ECRIRE.md` liste les 31 tests proposés (13 obligatoires, 18 bonus). La fiche du TP est dans `docs/`.
+Application Python de gestion simplifiée de l'énergie solaire.
+Le projet contient les modules applicatifs, les tests unitaires, d'intégration
+et de sécurité, ainsi que le workflow GitHub Actions.
+
+Le rapport complet se trouve à la racine du dépôt : [`RAPPORT_TP.md`](../RAPPORT_TP.md).
 
 ## Installation et exécution
 
