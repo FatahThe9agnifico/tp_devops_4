@@ -19,9 +19,8 @@ jobs:
           python-version: "3.12"
 
       - name: Installer les dépendances
-        run: pip install -r requirements.txt
-        working-directory: smart-energy
+        run: pip install -r smart-energy/requirements.txt
 
       - name: Lancer les tests
-        run: pytest -v
+        run: python -m pytest -v
         working-directory: smart-energy
