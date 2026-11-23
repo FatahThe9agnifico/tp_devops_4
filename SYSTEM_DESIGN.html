@@ -131,6 +131,7 @@
         <a href="#business">Business</a>
         <a href="#architecture">Architecture</a>
         <a href="#inercoin">InerCoin</a>
+        <a href="#business-tests">Business tests</a>
         <a href="#security">Security review</a>
         <a href="#roadmap">Roadmap</a>
       </nav>
@@ -368,6 +369,75 @@
             <tr><td>Is a public blockchain required?</td><td>Not for a single operator. Start with a conventional auditable ledger; consider distributed-ledger technology only if independent parties need shared governance.</td></tr>
           </tbody>
         </table>
+      </div>
+      <div id="business-tests" style="scroll-margin-top:24px; margin-top:32px">
+        <div class="section-heading">
+          <p class="eyebrow">Business acceptance tests · proposed</p>
+          <h3>Prove that energy and credits reconcile</h3>
+          <p class="lead">
+            These scenario tests define what a future tariff and settlement
+            service should guarantee. They are proposals, not tests currently
+            implemented in the Python prototype, which has no interval meter
+            store, allocation engine, or InerCoin ledger.
+          </p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Test</th><th>Example and pass condition</th><th>Business limitation addressed</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>BX1 · Credit only verified export</strong></td>
+                <td>During one interval, PV produces 10 kWh, the home uses 7 kWh, the battery stores 2 kWh, and the certified export meter records 1 kWh. At most 1 kWh is eligible for an export credit—not 3 or 10 kWh.</td>
+                <td>Prevents counting self-consumption or battery charging as energy sold to the community.</td>
+              </tr>
+              <tr>
+                <td><strong>BX2 · Deterministic tariff and rounding</strong></td>
+                <td>Given an illustrative published rate of 0.08 InerCoin/kWh and 1.25 eligible kWh, calculate 0.10 InerCoin using a documented precision and rounding rule; repeated calculations produce the same result.</td>
+                <td>Prevents inconsistent payouts, hidden rounding choices, and disputes over how the advertised tariff was applied. The rate is an example, not a proposed real-world price.</td>
+              </tr>
+              <tr>
+                <td><strong>BX3 · Duplicate and late readings</strong></td>
+                <td>Submit the same interval event twice, then deliver a delayed reading after a network outage. The duplicate creates no second credit; the late interval remains pending until reconciliation, then settles once.</td>
+                <td>Prevents duplicate credits and premature settlement when homes buffer data offline or messages arrive out of order.</td>
+              </tr>
+              <tr>
+                <td><strong>BX4 · Limited community supply</strong></td>
+                <td>With 4 kWh available and eligible requests totalling 7 kWh, the allocation never exceeds 4 kWh and follows a published priority or pro-rata rule. Unserved demand is reported rather than silently promised.</td>
+                <td>Prevents overselling energy and opaque or unfair allocation among participating homes.</td>
+              </tr>
+              <tr>
+                <td><strong>BX5 · Missing or suspect meter interval</strong></td>
+                <td>If an export reading is missing, out of range, or fails meter reconciliation, mark settlement as pending/exception and issue no final credit until an approved correction or estimate policy is applied.</td>
+                <td>Prevents paying against incomplete or untrusted data and makes operational exceptions visible.</td>
+              </tr>
+              <tr>
+                <td><strong>BX6 · Battery reserve and eligible discharge</strong></td>
+                <td>A proposed discharge must not cross the household's configured reserve or manufacturer safety limits. If it would, reject the dispatch recommendation and do not count that energy as available supply.</td>
+                <td>Protects household backup needs and battery life; avoids selling energy that cannot safely be delivered.</td>
+              </tr>
+              <tr>
+                <td><strong>BX7 · Tariff changes are versioned</strong></td>
+                <td>Changing a tariff for a new settlement period does not silently alter already finalized periods. Every credit records the tariff version and interval used.</td>
+                <td>Prevents retroactive price changes, improves auditability, and supports transparent customer statements.</td>
+              </tr>
+              <tr>
+                <td><strong>BX8 · Dispute and correction trail</strong></td>
+                <td>A corrected meter value creates a linked reversal/adjustment with an actor, reason, and evidence; the original transaction remains visible and the final balance reconciles.</td>
+                <td>Supports customer disputes and audit requirements without erasing history or hiding operator errors.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout" style="margin-top:16px">
+          <strong>Prototype boundary:</strong>
+          BX1–BX8 should become integration and acceptance tests only after
+          meter intervals, tariff rules, allocation policy, and a settlement
+          ledger are specified. The current unit tests validate sensor parsing,
+          energy arithmetic, battery bounds, and alerts; they do not prove
+          billing correctness or commercial fairness.
+        </div>
       </div>
     </section>
 
